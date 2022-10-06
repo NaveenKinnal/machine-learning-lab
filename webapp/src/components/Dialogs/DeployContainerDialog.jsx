@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
+import { Grid } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -31,6 +32,8 @@ function DeployContainerDialog(props) {
     deploymentName: '',
     deploymentParameters: {},
     deploymentEndpoints: [],
+    minCpus: 1,
+    minMemory: 1000,
   });
 
   const onChange = (e) =>
@@ -69,6 +72,7 @@ function DeployContainerDialog(props) {
           margin="dense"
         />
         <TextField
+          required
           label="Deployment Name"
           type="text"
           name="deploymentName"
@@ -80,7 +84,31 @@ function DeployContainerDialog(props) {
           fullWidth
           margin="dense"
         />
-
+        {/* <Grid item xs={12}>
+          <Divider textAlign="left">Workspace Resources</Divider>
+        </Grid> */}
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <TextField
+              type="number"
+              label="Number of CPUs"
+              name="minCpus"
+              value={deploymentInput.minCpus}
+              onChange={onChange}
+              margin="dense"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              type="number"
+              label="Memory in MB"
+              name="minMemory"
+              value={deploymentInput.minMemory}
+              onChange={onChange}
+              margin="dense"
+            />
+          </Grid>
+        </Grid>
         <Typography className={`${className} subtitle`} variant="subtitle2">
           Configuration Variables
         </Typography>
@@ -113,7 +141,8 @@ function DeployContainerDialog(props) {
           disabled={
             isContainerImageInvalid ||
             isDeploymentNameInvalid ||
-            !deploymentInput.containerImage
+            !deploymentInput.containerImage ||
+            !deploymentInput.deploymentName
           }
           onClick={() => onDeploy(deploymentInput, onClose)}
           color="primary"

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-// import React, { useCallback, useMemo } from 'react';
+
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -12,6 +12,7 @@ import { useShowAppDialog } from '../../app/AppDialogServiceProvider';
 import ContentDialog from '../../components/Dialogs/ContentDialog';
 import DeployServiceDialog from '../../components/Dialogs/DeployContainerDialog';
 import GlobalStateContainer from '../../app/store';
+import LogsDialog from '../../components/Dialogs/LogsDialog';
 import ResourceActionsDialog from '../../components/Dialogs/ResourceActionsDialog';
 import ServicesContainer from './ServicesContainer';
 import showStandardSnackbar from '../../app/showStandardSnackbar';
@@ -31,6 +32,8 @@ function Services(props) {
           deploymentName,
           deploymentParameters,
           deploymentEndpoints,
+          minCpus,
+          minMemory,
         },
         onClose
       ) => {
@@ -39,6 +42,7 @@ function Services(props) {
           display_name: deploymentName,
           endpoints: deploymentEndpoints,
           parameters: deploymentParameters,
+          compute: { min_cpus: minCpus, min_memory: minMemory },
         };
         try {
           await servicesApi.deployService(activeProject.id, serviceInput);
@@ -73,8 +77,12 @@ function Services(props) {
   const onShowServiceLogs = useCallback(
     async (projectId, serviceId) => {
       try {
-        const logs = await servicesApi.getServiceLogs(projectId, serviceId);
-        showAppDialog(ContentDialog, { content: logs, title: 'Logs' });
+        showAppDialog(LogsDialog, {
+          title: 'Logs',
+          projectId,
+          id: serviceId,
+          type: 'service',
+        });
       } catch (err) {
         showStandardSnackbar('Could not load service logs');
       }
@@ -85,6 +93,7 @@ function Services(props) {
   const onServiceDelete = useCallback(
     async (projectId, serviceId) => {
       try {
+        showStandardSnackbar(`Deleting service ${serviceId}...`);
         await servicesApi.deleteService(projectId, serviceId);
         showStandardSnackbar(`Deleted service '${serviceId}'`);
         reloadServices();
